@@ -101,12 +101,12 @@ public class Alexascode : MonoBehaviour
                 if (i % 2 == 0)
                 {
                     Reverse_Direction(false);
-                    print("bounce1");
+               //     print("bounce1");
                 }
                 else
                 {
                     Reverse_Direction(true);
-                     print("bounce2");
+                //     print("bounce2");
                 }
             }
         }
