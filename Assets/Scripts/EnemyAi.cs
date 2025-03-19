@@ -9,33 +9,32 @@ public class EnemyAi : MonoBehaviour
     enum Mode { Searching, Alerted, Hunting};
     Mode EnemyMode;
 
-    AudioSource SoundThatPlaysWhenEnemyHasLostYou;
-
+    AudioSource soundThatPlaysWhenEnemyHasLostYou;
 
     //Start of ray
-    public Vector3 EnemyHead;
+    public Vector3 enemyHead;
     //end of ray
-    public Vector3 PlayerHead;
+    public Vector3 playerHead;
     //refrence to play location
-    public GameObject Player;
-    public NavMeshAgent Navigater;
+    public GameObject player;
+    public NavMeshAgent navigater;
     //a number to count time with with
-    public float TimeTillAlerted;
-    public float TimeTillGiveUp;
-    public float FollowPlayerTime;
+    public float timeTillAlerted;
+    public float timeTillGiveUp;
+    public float followPlayerTime;
     //Speeds while in each mode
-    public float SearchSpeed;
-    public float AlertSpeed;
-    public float HuntSpeed;
+    public float searchSpeed;
+    public float alertSpeed;
+    public float huntSpeed;
     //location of where an alert is
-    public Vector3 AlertLocation;
+    public Vector3 alertLocation;
     //get the player object and number his layer
-    private int PlayerLayer;
+    private int playerLayer;
     public GameObject player;
     //how far the enemy can kill your from
-    public float CatchRange;   
+    public float catchRange;   
     //hitbox to get near where player was
-    public GameObject AlertArea;
+    public GameObject alertArea;
     //distance beteen player and enemy
     public float distance;
     
@@ -44,19 +43,19 @@ public class EnemyAi : MonoBehaviour
     void Start()
     {
         //set mode to searching and setup random search location
-        AlertLocation = new Vector3(0, 0, 0);
+        alertLocation = new Vector3(0, 0, 0);
         EnemyMode = Mode.Searching;
         UpdateMode();
 
         //get the players game layer for use in ignoring collisions against ray cast on this enemy
-        PlayerLayer = player.layer;
+        playerLayer = player.layer;
 
-        SoundThatPlaysWhenEnemyHasLostYou = GetComponent<AudioSource>();
+        soundThatPlaysWhenEnemyHasLostYou = GetComponent<AudioSource>();
        
         
         //how long before enemy speeds up
 
-        TimeTillAlerted = 5;
+        timeTillAlerted = 5;
     }
 
 
@@ -68,23 +67,23 @@ public class EnemyAi : MonoBehaviour
         {
             //Set the enemy's speed based on their mode
             case Mode.Searching:
-                Navigater.speed = SearchSpeed;              
+                navigater.speed = searchSpeed;              
                 break;            
             case Mode.Alerted:
-                Navigater.speed = AlertSpeed;               
+                navigater.speed = alertSpeed;               
                 break;
             case Mode.Hunting:
-                Navigater.speed = HuntSpeed;             
+                navigater.speed = huntSpeed;             
                 break;
             default:
-                Navigater.speed = SearchSpeed;
+                navigater.speed = searchSpeed;
                 print("oops i'm not in a mode");
                 break;
         }
     }
     public void RecieveAlert(Vector3 alert)
     {
-        AlertLocation = alert;
+        alertLocation = alert;
     }
 
        
@@ -93,15 +92,15 @@ public class EnemyAi : MonoBehaviour
     {
         print(EnemyMode);
         //giving vectors the location
-        PlayerHead = Player.transform.position;
-        EnemyHead = transform.position; 
+        playerHead = player.transform.position;
+        enemyHead = transform.position; 
 
         //find the distance between and the direction towards
-        distance = Vector3.Distance(PlayerHead, EnemyHead);
-        Vector3 direction = (PlayerHead - EnemyHead).normalized;         
+        distance = Vector3.Distance(playerHead, enemyHead);
+        Vector3 direction = (playerHead - enemyHead).normalized;         
                
         //move to the most interesting place
-        Navigater.destination = AlertLocation;
+        navigater.destination = alertLocation;
         
         //check if you can see player
        // Debug.DrawRay(EnemyHead, direction, Color.black);
@@ -109,23 +108,23 @@ public class EnemyAi : MonoBehaviour
         
         RaycastHit hit;
         //can this object see the player
-        if (Physics.Raycast(EnemyHead, direction,out hit,distance, PlayerLayer))
+        if (Physics.Raycast(enemyHead, direction,out hit,distance, playerLayer))
         {
             //if it can't 
 
             //start following the player for a little bit after losing sight
-            FollowPlayerTime = FollowPlayerTime - Time.deltaTime;
-            if(EnemyMode != Mode.Searching & FollowPlayerTime > 0)
+            followPlayerTime = followPlayerTime - Time.deltaTime;
+            if(EnemyMode != Mode.Searching & followPlayerTime > 0)
             {
-                AlertLocation = PlayerHead;
+                alertLocation = playerHead;
             }
 
             //lost player completly
-            if(EnemyMode != Mode.Searching & FollowPlayerTime < 0)
+            if(EnemyMode != Mode.Searching & followPlayerTime < 0)
             {
                 //set a new search location should be put in here or swap chance to other player
                 //sound notification
-                SoundThatPlaysWhenEnemyHasLostYou.Play(0);
+                soundThatPlaysWhenEnemyHasLostYou.Play(0);
                 EnemyMode = Mode.Searching;               
                 UpdateMode();
             }
@@ -138,7 +137,7 @@ public class EnemyAi : MonoBehaviour
         else
         {
             //How long to follow player after losing sight
-            FollowPlayerTime = 5;
+            followPlayerTime = 5;
 
             //set the mode to alerted
             if (EnemyMode != Mode.Hunting)
@@ -147,16 +146,16 @@ public class EnemyAi : MonoBehaviour
                 UpdateMode();
             }
             //can it catch you
-            if(distance <= CatchRange)
+            if(distance <= catchRange)
             {
                 print("i got you");
             }
             //go to player head
-            AlertLocation = PlayerHead;
+            alertLocation = playerHead;
                             
             //after being allerted to long hunt the player
-            TimeTillAlerted = TimeTillAlerted - Time.deltaTime;
-            if(TimeTillAlerted <= 0)
+            timeTillAlerted = timeTillAlerted - Time.deltaTime;
+            if(timeTillAlerted <= 0)
             {
                 EnemyMode = Mode.Hunting;               
                 UpdateMode();
